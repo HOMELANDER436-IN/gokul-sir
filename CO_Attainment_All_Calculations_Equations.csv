@@ -1,0 +1,72 @@
+Section,Item,Source Cells,Excel Formula / Source Logic,System Equation,Inputs / Parameters,Current Value / Example,Notes
+Workbook,CO Calculation,CO Calculation,,,,Rows 5–62 contain 58 students,Primary student-level CO calculation and course-level assessment/mapping sheet.
+Workbook,OVERALL CO,OVERALL CO,,,,ESL120.1–ESL120.8,Separate eight-CO overall mapping/attainment sheet.
+Grade Conversion,S → University Mark,CO Calculation!E5:E62,Nested IF grade conversion,U = 100 when Grade = S,Grade=S,100,Store U as numeric.
+Grade Conversion,A+ → University Mark,CO Calculation!E5:E62,Nested IF grade conversion,U = 89 when Grade = A+,Grade=A+,89,Store U as numeric.
+Grade Conversion,A → University Mark,CO Calculation!E5:E62,Nested IF grade conversion,U = 84 when Grade = A,Grade=A,84,Store U as numeric.
+Grade Conversion,B+ → University Mark,CO Calculation!E5:E62,Nested IF grade conversion,U = 79 when Grade = B+,Grade=B+,79,Store U as numeric.
+Grade Conversion,B → University Mark,CO Calculation!E5:E62,Nested IF grade conversion,U = 74 when Grade = B,Grade=B,74,Store U as numeric.
+Grade Conversion,C+ → University Mark,CO Calculation!E5:E62,Nested IF grade conversion,U = 69 when Grade = C+,Grade=C+,69,Store U as numeric.
+Grade Conversion,C → University Mark,CO Calculation!E5:E62,Nested IF grade conversion,U = 64 when Grade = C,Grade=C,64,Store U as numeric.
+Grade Conversion,D → University Mark,CO Calculation!E5:E62,Nested IF grade conversion,U = 59 when Grade = D,Grade=D,59,Store U as numeric.
+Grade Conversion,P → University Mark,CO Calculation!E5:E62,Nested IF grade conversion,U = 54 when Grade = P,Grade=P,54,Store U as numeric.
+Grade Conversion,F → University Mark,CO Calculation!E5:E62,Nested IF grade conversion,U = 0 when Grade = F,Grade=F,0,Store U as numeric.
+Grade Conversion,FE → University Mark,CO Calculation!E5:E62,Nested IF grade conversion,U = 0 when Grade = FE,Grade=FE,0,Store U as numeric.
+Equation Table,E01 — Grade conversion,CO Calculation!E5:E62,"=IF(G=""S"",""100"",IF(G=""A+"",""89"",IF(G=""A"",""84"",IF(G=""B+"",""79"",IF(G=""B"",""74"",IF(G=""C+"",""69"",IF(G=""C"",""64"",IF(G=""D"",""59"",IF(G=""P"",""54"",IF(OR(G=""F"",G=""FE""),""0"",""""))))))))))",U=f(G): S=100; A+=89; A=84; B+=79; B=74; C+=69; C=64; D=59; P=54; F/FE=0,G=grade,,Original Excel returns text; application should store numeric marks.
+Equation Table,E02 — Student CO1,CO Calculation!F5:F62,=((C5+E5)/150)*100,CO1=((I+U)/150)*100,I=internal; U=university; denominator=150,,Copied row-wise.
+Equation Table,E03 — Student CO2,CO Calculation!G5:G62,=((C5+E5)/150)*100,CO2=((I+U)/150)*100,I=internal; U=university; denominator=150,,Copied row-wise.
+Equation Table,E04 — Student CO3,CO Calculation!H5:H62,=((C5+E5)/150)*100,CO3=((I+U)/150)*100,I=internal; U=university; denominator=150,,Copied row-wise.
+Equation Table,E05 — Student CO4,CO Calculation!I5:I62,=(H6)/100*100 for most rows; I5 uses main formula,CO4=CO3,CO3,,Mathematically identical; row 5 has a direct main-formula exception.
+Equation Table,E06 — Student CO5,CO Calculation!J5:J62,=(I6)/100*100 for most rows; J5 uses main formula,CO5=CO4,CO4,,Mathematically identical; row 5 has a direct main-formula exception.
+Equation Table,E07 — Continuous Evaluation,CO Calculation!K5:K62,=C5/30*100,CE=(I/30)*100,I=internal; denominator=30,,Separate metric.
+Equation Table,E08 — Students attaining CO,CO Calculation!F63:J63,"=COUNTIFS(CO_RANGE,"">=55"",CO_RANGE,""<=100"")",N_CO=count(CO >= 55 and CO <= 100),Lower=55; upper=100,,Applied to each CO1–CO5.
+Equation Table,E09 — CO attainment percentage,CO Calculation!F64:J64,"=ROUND(F63/A62*100,0)","P_CO=ROUND((N_CO/N_total)*100,0)",N_total=58 in current workbook,,A62 is the current final roll-number cell.
+Equation Table,E10 — CE attainment percentage,CO Calculation!K64,"=ROUND(K63/14*100,0)","P_CE=ROUND(N_CE/14*100,0)",Denominator=14,,Hardcoded in source; make configurable.
+Equation Table,E11 — CO attainment level,CO Calculation!F68:J68,"=IF(F64>75,3,IF(F64>65,2,IF(F64>55,1)))",3 if P>75; 2 if P>65; 1 if P>55; otherwise N/A,"Thresholds=75,65,55",,Strict greater-than comparisons.
+Equation Table,E12 — CE attainment level,CO Calculation!K68,"=IF(K64>70,3,IF(K64>60,2,IF(K64>50,1)))",3 if P>70; 2 if P>60; 1 if P>50; otherwise N/A,"Thresholds=70,60,50",,Separate thresholds.
+Equation Table,E13 — Final CO from assessment tools,CO Calculation!C75:G75,=(C73+C74)/2,FinalCO=(Board/University + Survey)/2,Board; Survey,,Used for ESL120.1–ESL120.5.
+Equation Table,E14 — Original PO/PSO attainment,CO Calculation!D84:R84; OVERALL CO!D17:R17,"=SUM(range)/COUNTIF(range,"">0"")",Original_j=SUM(positive mappings)/COUNT(positive mappings),Mapping values 0–3,,Use N/A if denominator=0.
+Equation Table,E15 — CO→PO/PSO attained value,CO Calculation!D87:R91; OVERALL CO!D20:R27,=$C$87*D79/3,"Attained_CO,Outcome=(FinalCO×Mapping)/3",FinalCO; Mapping; max level=3,,Zero mapping gives 0.
+Equation Table,E16 — Final PO/PSO attainment,CO Calculation!D92:R92; OVERALL CO!D28:R28,"=SUM(range)/COUNTIF(range,"">0"")",Final_j=SUM(positive attained values)/COUNT(positive values),Mapped attained values,,Use N/A if denominator=0.
+Student Input,Student row 5,CO Calculation!A5:D5,,Student master record,Roll=1; Name=AABDUL FARDEEN M N - CEC19CS001; Internal=32.0; Grade=C+,Teacher should select student and grade; other fields are auto-loaded.,
+Student Calculation,Roll 1 — University Mark,CO Calculation!E5,"=IF(D5=""S"",""100"",IF(D5=""A+"",""89"",IF(D5=""A"",""84"",IF(D5=""B+"",""79"",IF(D5=""B"",""74"",IF(D5=""C+"",""69"",IF(D5=""C"",""64"",IF(D5=""D"",""59"",IF(D5=""P"",""54"",IF(OR(D5=""F"",D5=""FE""),""0"",""""))))))))))",U=f(Grade),Grade=C+,69,Automatically derived.
+Student Calculation,Roll 1 — CO1,CO Calculation!F5,=((C5+E5)/150)*100,CO=((I+U)/150)*100,Internal=32.0; University=69,67.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 1 — CO2,CO Calculation!G5,=((C5+E5)/150)*100,CO=((I+U)/150)*100,Internal=32.0; University=69,67.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 1 — CO3,CO Calculation!H5,=((C5+E5)/150)*100,CO=((I+U)/150)*100,Internal=32.0; University=69,67.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 1 — CO4,CO Calculation!I5,=((C5+E5)/150)*100,CO4=CO3,Internal=32.0; University=69,67.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 1 — CO5,CO Calculation!J5,=((C5+E5)/150)*100,CO5=CO4,Internal=32.0; University=69,67.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 1 — CO1–CO8 Continuous Evaluation,CO Calculation!K5,=C5/30*100,CE=(I/30)*100,Internal=32.0,106.6666666667,
+Student Input,Student row 6,CO Calculation!A6:D6,,Student master record,Roll=2; Name=Abdulla Hashim - CEC19CS002; Internal=35.0; Grade=P,Teacher should select student and grade; other fields are auto-loaded.,
+Student Calculation,Roll 2 — University Mark,CO Calculation!E6,"=IF(D6=""S"",""100"",IF(D6=""A+"",""89"",IF(D6=""A"",""84"",IF(D6=""B+"",""79"",IF(D6=""B"",""74"",IF(D6=""C+"",""69"",IF(D6=""C"",""64"",IF(D6=""D"",""59"",IF(D6=""P"",""54"",IF(OR(D6=""F"",D6=""FE""),""0"",""""))))))))))",U=f(Grade),Grade=P,54,Automatically derived.
+Student Calculation,Roll 2 — CO1,CO Calculation!F6,=((C6+E6)/150)*100,CO=((I+U)/150)*100,Internal=35.0; University=54,59.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 2 — CO2,CO Calculation!G6,=((C6+E6)/150)*100,CO=((I+U)/150)*100,Internal=35.0; University=54,59.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 2 — CO3,CO Calculation!H6,=((C6+E6)/150)*100,CO=((I+U)/150)*100,Internal=35.0; University=54,59.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 2 — CO4,CO Calculation!I6,=(H6)/100*100,CO4=CO3,Internal=35.0; University=54,59.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 2 — CO5,CO Calculation!J6,=(I6)/100*100,CO5=CO4,Internal=35.0; University=54,59.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 2 — CO1–CO8 Continuous Evaluation,CO Calculation!K6,=C6/30*100,CE=(I/30)*100,Internal=35.0,116.6666666667,
+Student Input,Student row 7,CO Calculation!A7:D7,,Student master record,Roll=3; Name=AIWI DAS B - CEC19CS003; Internal=32.0; Grade=P,Teacher should select student and grade; other fields are auto-loaded.,
+Student Calculation,Roll 3 — University Mark,CO Calculation!E7,"=IF(D7=""S"",""100"",IF(D7=""A+"",""89"",IF(D7=""A"",""84"",IF(D7=""B+"",""79"",IF(D7=""B"",""74"",IF(D7=""C+"",""69"",IF(D7=""C"",""64"",IF(D7=""D"",""59"",IF(D7=""P"",""54"",IF(OR(D7=""F"",D7=""FE""),""0"",""""))))))))))",U=f(Grade),Grade=P,54,Automatically derived.
+Student Calculation,Roll 3 — CO1,CO Calculation!F7,=((C7+E7)/150)*100,CO=((I+U)/150)*100,Internal=32.0; University=54,57.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 3 — CO2,CO Calculation!G7,=((C7+E7)/150)*100,CO=((I+U)/150)*100,Internal=32.0; University=54,57.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 3 — CO3,CO Calculation!H7,=((C7+E7)/150)*100,CO=((I+U)/150)*100,Internal=32.0; University=54,57.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 3 — CO4,CO Calculation!I7,=(H7)/100*100,CO4=CO3,Internal=32.0; University=54,57.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 3 — CO5,CO Calculation!J7,=(I7)/100*100,CO5=CO4,Internal=32.0; University=54,57.3333333333,Calculated from source workbook logic.
+Student Calculation,Roll 3 — CO1–CO8 Continuous Evaluation,CO Calculation!K7,=C7/30*100,CE=(I/30)*100,Internal=32.0,106.6666666667,
+Student Input,Student row 8,CO Calculation!A8:D8,,Student master record,Roll=4; Name=Akash K V - CEC19CS004; Internal=38.0; Grade=B,Teacher should select student and grade; other fields are auto-loaded.,
+Student Calculation,Roll 4 — University Mark,CO Calculation!E8,"=IF(D8=""S"",""100"",IF(D8=""A+"",""89"",IF(D8=""A"",""84"",IF(D8=""B+"",""79"",IF(D8=""B"",""74"",IF(D8=""C+"",""69"",IF(D8=""C"",""64"",IF(D8=""D"",""59"",IF(D8=""P"",""54"",IF(OR(D8=""F"",D8=""FE""),""0"",""""))))))))))",U=f(Grade),Grade=B,74,Automatically derived.
+Student Calculation,Roll 4 — CO1,CO Calculation!F8,=((C8+E8)/150)*100,CO=((I+U)/150)*100,Internal=38.0; University=74,74.6666666667,Calculated from source workbook logic.
+Student Calculation,Roll 4 — CO2,CO Calculation!G8,=((C8+E8)/150)*100,CO=((I+U)/150)*100,Internal=38.0; University=74,74.6666666667,Calculated from source workbook logic.
+Student Calculation,Roll 4 — CO3,CO Calculation!H8,=((C8+E8)/150)*100,CO=((I+U)/150)*100,Internal=38.0; University=74,74.6666666667,Calculated from source workbook logic.
+Student Calculation,Roll 4 — CO4,CO Calculation!I8,=(H8)/100*100,CO4=CO3,Internal=38.0; University=74,74.6666666667,Calculated from source workbook logic.
+Student Calculation,Roll 4 — CO5,CO Calculation!J8,=(I8)/100*100,CO5=CO4,Internal=38.0; University=74,74.6666666667,Calculated from source workbook logic.
+Student Calculation,Roll 4 — CO1–CO8 Continuous Evaluation,CO Calculation!K8,=C8/30*100,CE=(I/30)*100,Internal=38.0,126.6666666667,
+Student Input,Student row 9,CO Calculation!A9:D9,,Student master record,Roll=5; Name=Alfina Roshni K B - CEC19CS005; Internal=31.0; Grade=P,Teacher should select student and grade; other fields are auto-loaded.,
+Student Calculation,Roll 5 — University Mark,CO Calculation!E9,"=IF(D9=""S"",""100"",IF(D9=""A+"",""89"",IF(D9=""A"",""84"",IF(D9=""B+"",""79"",IF(D9=""B"",""74"",IF(D9=""C+"",""69"",IF(D9=""C"",""64"",IF(D9=""D"",""59"",IF(D9=""P"",""54"",IF(OR(D9=""F"",D9=""FE""),""0"",""""))))))))))",U=f(Grade),Grade=P,54,Automatically derived.
+Student Calculation,Roll 5 — CO1,CO Calculation!F9,=((C9+E9)/150)*100,CO=((I+U)/150)*100,Internal=31.0; University=54,56.6666666667,Calculated from source workbook logic.
+Student Calculation,Roll 21 — CO1,CO Calculation!F25,=((C25+E25)/150)*100,CO=((I+U)/150)*100,Internal=45.0; University=84,86.0,Calculated from source workbook logic.
+Class CO Attainment,CO1,CO Calculation!F63:F68,"COUNTIFS(...,"">=55"",..., ""<=100""); ROUND(.../58*100,0); IF(...>75,3,IF(...>65,2,IF(...>55,1)))","N=52; P=ROUND(52/58*100,0)=90%; Level=3",Total students=58; threshold band=55–100,52 students; 90%; level 3,"Current workbook result, dynamically recalculated."
+Assessment Tools,ESL120.1,CO Calculation!C73:C75,Board=3; Survey=2.5; Final=(Board+Survey)/2,FinalCO=(3+2.5)/2=2.75,Board=3; Survey=2.5,2.75,Current values.
+Assessment Tools,ESL120.2,CO Calculation!D73:D75,Board=3; Survey=2.7; Final=(Board+Survey)/2,FinalCO=(3+2.7)/2=2.85,Board=3; Survey=2.7,2.85,Current values.
+Assessment Tools,ESL120.3,CO Calculation!E73:E75,Board=3; Survey=3.0; Final=(Board+Survey)/2,FinalCO=(3+3.0)/2=3.0,Board=3; Survey=3.0,3.0,Current values.
+Assessment Tools,ESL120.4,CO Calculation!F73:F75,Board=3; Survey=2.84; Final=(Board+Survey)/2,FinalCO=(3+2.84)/2=2.92,Board=3; Survey=2.84,2.92,Current values.
+Assessment Tools,ESL120.5,CO Calculation!G73:G75,Board=3; Survey=2.8; Final=(Board+Survey)/2,FinalCO=(3+2.8)/2=2.9,Board=3; Survey=2.8,2.9,Current values.

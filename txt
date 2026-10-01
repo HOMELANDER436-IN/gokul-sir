@@ -1,0 +1,1112 @@
+
+
+BUILD A COMPLETE CO ATTAINMENT MANAGEMENT SYSTEM
+
+You are an expert full-stack software engineer and academic assessment-system developer.
+
+Build a fully working production-quality web application called:
+
+CO ATTAINMENT MANAGEMENT SYSTEM
+
+The purpose is to replace an existing Excel-based CO/PO/PSO calculation workflow with a user-friendly software system.
+
+DO NOT create a fake demo.
+DO NOT create static pages with hardcoded calculated results.
+DO NOT simplify the calculation chain.
+DO NOT invent different formulas.
+
+The attached Excel workbook is the primary source of truth for the initial student data, assessment values, mapping values, and legacy calculation logic.
+
+Workbook:
+
+Copy of MAT101 2019-20CSxlsx.xlsx
+
+FIRST inspect and parse the workbook before writing the application.
+
+1. MAIN USER EXPERIENCE
+
+The teacher must have an extremely simple workflow.
+
+Teacher does:
+
+Search/select student.
+Select grade.
+Click Save/Calculate.
+
+Everything else must happen automatically.
+
+Example:
+
+Student:
+[ Search student... ]
+
+Grade:
+[ B ▼ ]
+
+[ SAVE & CALCULATE ]
+
+After selecting a student, automatically display:
+
+Student Name
+Register Number
+Roll Number
+Internal Mark
+University Mark
+CO1
+CO2
+CO3
+CO4
+CO5
+CO1–CO8 Continuous Evaluation
+
+The teacher must NOT manually type the internal mark, roll number, register number, university mark, or CO values when those values already exist in the database.
+
+2. REQUIRED TECH STACK
+
+Use:
+
+Frontend:
+
+React
+TypeScript
+Vite
+Tailwind CSS
+Recharts or another lightweight chart library
+
+Backend:
+
+Node.js
+Express
+TypeScript
+
+Database:
+
+SQLite for zero-cost local deployment
+Prisma ORM or another clean ORM
+
+Excel:
+
+SheetJS / xlsx library
+
+Architecture:
+
+React Frontend
+      |
+      | REST API
+      v
+Node/Express Backend
+      |
+      v
+SQLite Database
+
+Keep the calculation engine on the backend so the calculation logic is centralized.
+
+The frontend may also calculate preview values for instant UX, but the backend must remain the authoritative calculation engine.
+
+3. SOURCE WORKBOOK
+
+Inspect:
+
+CO Calculation
+OVERALL CO
+
+Do not assume the workbook structure.
+
+Read the actual workbook and extract:
+
+student records
+roll numbers
+names
+register numbers
+internal marks
+grades
+grade-to-university-mark relationship
+CO values
+class CO results
+assessment tool values
+PO/PSO mapping
+original PO/PSO attainment
+final PO/PSO attainment
+
+Student records are in rows 5–62 of the CO Calculation section.
+
+There are 58 current student records.
+
+The system must import those records during initial setup.
+
+4. STUDENT DATA MODEL
+
+Create:
+
+students
+
+Fields:
+
+id
+rollNo
+name
+registerNo
+internalMark
+active
+createdAt
+updatedAt
+
+The workbook currently contains values such as:
+
+AABDUL FARDEEN M N - CEC19CS001
+
+Parse this into:
+
+name = AABDUL FARDEEN M N
+registerNo = CEC19CS001
+
+Retain the original source value for traceability if useful.
+
+Roll number must be unique.
+
+Register number must be unique.
+
+5. GRADE DATA
+
+Allowed grades:
+
+S
+A+
+A
+B+
+B
+C+
+C
+D
+P
+F
+FE
+
+Grade mapping MUST be:
+
+S   -> 100
+A+  -> 89
+A   -> 84
+B+  -> 79
+B   -> 74
+C+  -> 69
+C   -> 64
+D   -> 59
+P   -> 54
+F   -> 0
+FE  -> 0
+
+Never use a different grade conversion unless an administrator changes the configuration.
+
+6. STUDENT ASSESSMENT TABLE
+
+Create:
+
+student_assessments
+
+Fields:
+
+id
+studentId
+grade
+universityMark
+createdAt
+updatedAt
+
+When a grade changes, university mark must automatically update.
+
+7. EXACT STUDENT CO CALCULATION
+
+Let:
+
+I = internal mark
+U = university mark
+
+Main formula:
+
+CO = ((I + U) / 150) * 100
+
+Implement:
+
+CO1 = ((I + U) / 150) * 100
+CO2 = ((I + U) / 150) * 100
+CO3 = ((I + U) / 150) * 100
+
+The workbook's CO4 and CO5 formulas ultimately preserve the same value.
+
+Implement the final numerical behavior as:
+
+CO4 = CO3
+CO5 = CO4
+
+If exact Excel-compatible provenance is required, preserve the original dependency chain:
+
+CO4 = (CO3 / 100) * 100
+CO5 = (CO4 / 100) * 100
+
+Do not change the resulting numerical value.
+
+Store:
+
+co1
+co2
+co3
+co4
+co5
+8. CONTINUOUS EVALUATION
+
+The workbook has a separate formula:
+
+continuousEvaluation = internalMark / 30 * 100
+
+IMPORTANT:
+
+Do not replace this with the 150-based CO formula.
+
+They are two different metrics.
+
+Example:
+
+Internal Mark = 38
+
+Continuous Evaluation
+= 38 / 30 * 100
+= 126.6667
+
+The application must reproduce this behavior.
+
+9. CLASS CO ATTAINMENT
+
+For each CO1–CO5 calculate:
+
+studentsAttained =
+number of students where
+55 <= CO <= 100
+
+Equivalent logic:
+
+COUNTIFS(CO_RANGE, ">=55", CO_RANGE, "<=100")
+
+For the current workbook:
+
+CO1 = 52
+CO2 = 52
+CO3 = 52
+CO4 = 52
+CO5 = 52
+
+Do not hardcode these results.
+
+Always recalculate from the current student data.
+
+10. CO PERCENTAGE
+
+Formula:
+
+percentage =
+round((studentsAttained / totalStudents) * 100, 0)
+
+For the current data:
+
+52 / 58 * 100
+= 89.655...
+= 90%
+
+Current expected values:
+
+CO1 = 90%
+CO2 = 90%
+CO3 = 90%
+CO4 = 90%
+CO5 = 90%
+11. CONTINUOUS-EVALUATION CLASS PERCENTAGE
+
+The current workbook has:
+
+round((numberAttained / 14) * 100, 0)
+
+The denominator 14 is currently hardcoded.
+
+DO NOT silently replace it with total student count.
+
+Instead create a configurable setting:
+
+continuousEvaluationDenominator = 14
+
+Default value:
+
+14
+
+For the current workbook:
+
+numberAttained = 5
+
+5 / 14 * 100
+= 35.714...
+= 36%
+12. CO ATTAINMENT LEVEL
+
+For CO1–CO5:
+
+if percentage > 75 => level 3
+else if percentage > 65 => level 2
+else if percentage > 55 => level 1
+else => no attainment
+
+IMPORTANT:
+The workbook uses strict > comparisons.
+
+Therefore:
+
+76 -> 3
+75 -> 2
+66 -> 2
+65 -> 1
+56 -> 1
+55 -> no attainment
+
+Do not change these thresholds.
+
+Make them configurable in the settings table, with default values:
+
+CO Level 3 threshold = 75
+CO Level 2 threshold = 65
+CO Level 1 threshold = 55
+13. CONTINUOUS EVALUATION ATTAINMENT LEVEL
+
+Use the separate workbook thresholds:
+
+if percentage > 70 => level 3
+else if percentage > 60 => level 2
+else if percentage > 50 => level 1
+else => no attainment
+
+Defaults:
+
+70
+60
+50
+
+Do not reuse the CO1–CO5 thresholds.
+
+14. ASSESSMENT TOOLS
+
+Create:
+
+assessment_tools
+
+Support:
+
+Board / University Exam
+Survey
+Final
+
+For current CO Calculation data use:
+
+Board:
+CO1 = 3
+CO2 = 3
+CO3 = 3
+CO4 = 3
+CO5 = 3
+
+Survey defaults:
+
+CO1 = 2.50
+CO2 = 2.70
+CO3 = 3.00
+CO4 = 2.84
+CO5 = 2.80
+
+These values MUST be configurable from the admin settings/interface.
+
+Do not hardcode them into React components.
+
+15. FINAL CO
+
+Formula:
+
+finalCO = (boardUniversityExam + survey) / 2
+
+Expected current values:
+
+CO1 = 2.75
+CO2 = 2.85
+CO3 = 3.00
+CO4 = 2.92
+CO5 = 2.90
+
+Display with 2 decimal places in the UI.
+
+Maintain higher precision internally.
+
+16. CO-PO-PSO MAPPING
+
+Create a database table:
+
+co_po_mapping
+
+Fields:
+
+coCode
+outcomeType
+outcomeCode
+mappingValue
+
+Allowed mapping values:
+
+0
+1
+2
+3
+
+Meanings:
+
+0 = no mapping
+1 = low
+2 = medium
+3 = high
+
+Initial CO Calculation mapping MUST be imported as:
+
+CO1:
+PO1 0
+PO2 0
+PO3 0
+PO4 3
+PO5 2
+PO6 1
+PO7 0
+PO8 0
+PO9 1
+PO10 2
+PO11 0
+PO12 2
+PSO1 3
+PSO2 3
+PSO3 3
+
+CO2:
+PO1 0
+PO2 0
+PO3 0
+PO4 3
+PO5 2
+PO6 1
+PO7 0
+PO8 0
+PO9 1
+PO10 2
+PO11 0
+PO12 2
+PSO1 3
+PSO2 3
+PSO3 3
+
+CO3:
+PO1 0
+PO2 0
+PO3 0
+PO4 3
+PO5 2
+PO6 1
+PO7 0
+PO8 2
+PO9 1
+PO10 2
+PO11 0
+PO12 2
+PSO1 3
+PSO2 3
+PSO3 3
+
+CO4:
+PO1 0
+PO2 0
+PO3 0
+PO4 2
+PO5 1
+PO6 1
+PO7 0
+PO8 2
+PO9 1
+PO10 2
+PO11 0
+PO12 2
+PSO1 3
+PSO2 2
+PSO3 3
+
+CO5:
+PO1 0
+PO2 0
+PO3 0
+PO4 3
+PO5 2
+PO6 1
+PO7 0
+PO8 0
+PO9 1
+PO10 2
+PO11 0
+PO12 2
+PSO1 3
+PSO2 3
+PSO3 3
+17. ORIGINAL PO/PSO ATTAINMENT
+
+For each PO/PSO:
+
+originalAttainment =
+sum(all positive mapping values)
+/
+count(all mapping values > 0)
+
+Equivalent:
+
+SUM(mapping) / COUNTIF(mapping, ">0")
+
+IMPORTANT:
+
+If there are zero positive mappings:
+
+do not show #DIV/0!
+
+Display:
+
+N/A
+
+and optionally show:
+
+No CO is mapped to this PO/PSO.
+18. FINAL CO → PO/PSO ATTAINMENT
+
+Formula:
+
+attainedValue = finalCO * mappingValue / 3
+
+Examples:
+
+finalCO = 2.75
+mapping = 3
+result = 2.75
+
+finalCO = 2.75
+mapping = 2
+result = 1.833333...
+
+finalCO = 2.75
+mapping = 1
+result = 0.916667...
+
+mapping = 0
+result = 0
+
+Denominator must be configurable, default:
+
+3
+19. FINAL PO/PSO ATTAINMENT
+
+For each PO/PSO:
+
+finalAttainment =
+sum(attainedValue)
+/
+count(attainedValue > 0)
+
+Again:
+
+if denominator = 0
+then display N/A
+
+Never expose raw #DIV/0!.
+
+20. OVERALL CO MODULE
+
+Implement a separate module corresponding to the OVERALL CO sheet.
+
+Support:
+
+ESL120.1
+ESL120.2
+ESL120.3
+ESL120.4
+ESL120.5
+ESL120.6
+ESL120.7
+ESL120.8
+
+Support:
+
+Board/University Exam
+Survey
+Final
+
+Import the mapping matrix from the workbook.
+
+Do not merge this eight-CO mapping with the five-CO CO Calculation mapping.
+
+They are separate configurations.
+
+21. UI DESIGN
+
+Create a polished academic administration interface.
+
+Style:
+
+Clean
+Professional
+Modern
+Minimal
+Desktop-first but responsive
+Suitable for college faculty
+Clear cards
+Tables
+Search
+Filters
+Charts
+Professional typography
+No excessive animations
+
+Main navigation:
+
+Dashboard
+Students
+Grade Entry
+CO Analysis
+Assessment Tools
+PO/PSO Mapping
+PO/PSO Attainment
+Reports
+Settings
+22. DASHBOARD
+
+Show:
+
+Total Students
+Evaluated Students
+Pending Students
+Average CO Attainment
+
+Then:
+
+CO1   90%   Level 3
+CO2   90%   Level 3
+CO3   90%   Level 3
+CO4   90%   Level 3
+CO5   90%   Level 3
+
+Charts:
+
+CO Attainment
+PO Attainment
+PSO Attainment
+Grade Distribution
+
+All values must be live data from the database.
+
+23. GRADE ENTRY PAGE
+
+Implement:
+
+Search Student
+
+with autocomplete.
+
+When the teacher types:
+
+akash
+
+show matching students.
+
+Example:
+
+Akash K V
+CEC19CS004
+Roll No: 4
+
+After selection:
+
+Internal Mark: 38
+
+Grade:
+
+[ B ▼ ]
+
+On grade change:
+
+Automatically calculate:
+
+University Mark = 74
+
+CO1 = 74.6667
+CO2 = 74.6667
+CO3 = 74.6667
+CO4 = 74.6667
+CO5 = 74.6667
+
+Continuous Evaluation = 126.6667
+
+Display a live calculation preview.
+
+24. STUDENT RESULT PAGE
+
+Show:
+
+Student Information
+Assessment
+University Mark
+CO Results
+Continuous Evaluation
+
+Include:
+
+CO1
+CO2
+CO3
+CO4
+CO5
+
+Use badges for attainment levels.
+
+25. CLASS CO ANALYSIS PAGE
+
+Table:
+
+CO
+Number Attained
+Total Students
+Percentage
+Level
+
+Example:
+
+CO1 | 52 | 58 | 90% | 3
+CO2 | 52 | 58 | 90% | 3
+...
+
+Include a bar chart.
+
+26. PO/PSO MAPPING PAGE
+
+Create an editable matrix.
+
+Columns:
+
+CO
+Target CO
+PO1 ... PO12
+PSO1 PSO2 PSO3
+
+Mapping cells use dropdown:
+
+0
+1
+2
+3
+
+Changing a mapping must automatically trigger recalculation.
+
+27. PO/PSO ATTAINMENT PAGE
+
+Show two sections:
+
+Original Mapping Attainment
+Final Attainment
+
+Columns:
+
+PO1
+PO2
+...
+PO12
+PSO1
+PSO2
+PSO3
+
+For unmapped outcomes show:
+
+N/A
+
+not an error.
+
+28. SETTINGS
+
+Create an admin settings page containing:
+
+Grade Conversion
+
+CO Attainment Thresholds
+
+Continuous Evaluation Thresholds
+
+Internal Maximum
+
+University Maximum
+
+Continuous Evaluation Maximum/Denominator
+
+Continuous Evaluation Eligible Student Denominator
+
+Maximum CO Attainment Level
+
+Maximum Mapping Value
+
+Survey Values
+
+CO/PO/PSO Mapping
+
+Defaults must reproduce the current workbook.
+
+29. CALCULATION ENGINE
+
+Create one central file/module.
+
+Example architecture:
+
+server/
+  calculation/
+    gradeCalculator.ts
+    coCalculator.ts
+    attainmentCalculator.ts
+    assessmentCalculator.ts
+    poPsoCalculator.ts
+    overallCoCalculator.ts
+
+Never duplicate calculation formulas across multiple API routes.
+
+Functions should include:
+
+gradeToUniversityMark()
+calculateStudentCO()
+calculateContinuousEvaluation()
+calculateCOAttainmentCount()
+calculateCOAttainmentPercentage()
+calculateCOAttainmentLevel()
+calculateFinalCO()
+calculateOriginalPOPSOAttainment()
+calculateMappedPOPSOAttainment()
+calculateFinalPOPSOAttainment()
+30. DATABASE RELATIONSHIPS
+
+Implement:
+
+Student
+   |
+   +---- Assessment
+             |
+             +---- Student CO Result
+
+CO
+ |
+ +---- Assessment Tool
+ |
+ +---- PO/PSO Mapping
+
+Use foreign keys.
+
+31. IMPORTER
+
+Build an Excel importer.
+
+The first-run importer should:
+
+Open workbook.
+Locate CO Calculation.
+Read student rows.
+Detect the student data area.
+Import roll number.
+Parse name/register number.
+Import internal marks.
+Import existing grades.
+Calculate university marks.
+Validate imported values.
+Save students.
+Read assessment-tool values.
+Read mapping matrix.
+Read OVERALL CO.
+Store configurations.
+
+Do not rely on Excel row numbers after import.
+
+Use database IDs internally.
+
+32. EXPORTER
+
+Build Excel export.
+
+Generate sheets:
+
+Student Results
+CO Calculation
+CO Attainment
+Assessment Tools
+PO PSO Mapping
+PO PSO Attainment
+OVERALL CO
+
+The export should be readable and professionally formatted.
+
+33. AUDIT / HISTORY
+
+Whenever a teacher changes a student's grade, store:
+
+student
+oldGrade
+newGrade
+oldUniversityMark
+newUniversityMark
+timestamp
+
+This allows changes to be traced.
+
+34. IMPORTANT LEGACY BEHAVIOR
+
+The current workbook contains:
+
+#DIV/0!
+
+when a PO/PSO has no mapping.
+
+The new system must not propagate Excel errors.
+
+Instead:
+
+No positive mapping
+→ N/A
+
+The mathematical logic must remain equivalent for all valid calculations.
+
+35. TEST CASES
+
+Implement automated tests.
+
+Test 1
+Internal = 38
+Grade = B
+
+Expected:
+
+University = 74
+CO = 74.666666...
+CE = 126.666666...
+Test 2
+Internal = 32
+Grade = C+
+
+Expected:
+
+University = 69
+CO = 67.333333...
+Test 3
+Internal = 28
+Grade = F
+
+Expected:
+
+University = 0
+CO = 18.666666...
+Test 4
+52 attained
+58 total
+
+Expected:
+
+90%
+Level 3
+Test 5
+5 continuous-evaluation students
+denominator = 14
+
+Expected:
+
+36%
+No attainment
+Test 6
+Final CO = 2.75
+Mapping = 3
+
+Expected:
+
+2.75
+Test 7
+Final CO = 2.75
+Mapping = 2
+
+Expected:
+
+1.833333...
+Test 8
+Mapping = 0
+
+Expected:
+
+0
+Test 9
+
+No positive mappings.
+
+Expected:
+
+N/A
+
+Never:
+
+#DIV/0!
+36. ACCEPTANCE CRITERIA
+
+The build is complete only when all of these are true:
+
+[ ] Workbook successfully imported
+[ ] 58 current students imported
+[ ] Student search works
+[ ] Grade dropdown works
+[ ] Grade-to-mark conversion works
+[ ] Internal marks load automatically
+[ ] CO1–CO5 calculated automatically
+[ ] Continuous evaluation calculated automatically
+[ ] Class CO counts are dynamic
+[ ] CO percentages are dynamic
+[ ] CO levels are dynamic
+[ ] Survey values are configurable
+[ ] Final CO values are dynamic
+[ ] PO/PSO mapping is editable
+[ ] Original PO/PSO attainment works
+[ ] Final PO/PSO attainment works
+[ ] Zero-mapping case shows N/A
+[ ] Excel export works
+[ ] Dashboard is dynamic
+[ ] Overall CO module works
+[ ] Data persists after page reload
+[ ] Backend validates all calculations
+[ ] Automated tests pass
+37. CRITICAL DEVELOPMENT RULE
+
+Do not simply reproduce the appearance of the Excel file.
+
+The goal is to convert the spreadsheet's logic into a real software system.
+
+The teacher should not need to understand formulas.
+
+The software must perform:
+
+NAME SELECTION
+      +
+GRADE INPUT
+      ↓
+AUTOMATIC MARK CONVERSION
+      ↓
+AUTOMATIC CO CALCULATION
+      ↓
+AUTOMATIC CLASS ATTAINMENT
+      ↓
+AUTOMATIC ASSESSMENT TOOL CALCULATION
+      ↓
+AUTOMATIC PO/PSO CALCULATION
+      ↓
+AUTOMATIC REPORT GENERATION
+
+Build the application completely, connect the frontend to the backend, connect the backend to the database, load the workbook's initial data, implement the calculation engine, and verify the numerical outputs against the source workbook before considering the task complete.
+
+Do not leave placeholder buttons, fake charts, mock calculation results, or TODO sections.
+
